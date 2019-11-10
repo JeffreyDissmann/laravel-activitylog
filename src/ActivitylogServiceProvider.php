@@ -14,16 +14,25 @@ class ActivitylogServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/../config/activitylog.php' => config_path('activitylog.php'),
+            __DIR__ . '/../config/activitylog.php' => config_path('activitylog.php'),
         ], 'config');
 
-        $this->mergeConfigFrom(__DIR__.'/../config/activitylog.php', 'activitylog');
+        $this->mergeConfigFrom(__DIR__ . '/../config/activitylog.php', 'activitylog');
 
-        if (! class_exists('CreateActivityLogTable')) {
+        if (!class_exists('CreateActivityLogTable')) {
             $timestamp = date('Y_m_d_His', time());
 
             $this->publishes([
-                __DIR__.'/../migrations/create_activity_log_table.php.stub' => database_path("/migrations/{$timestamp}_create_activity_log_table.php"),
+                __DIR__ . '/../migrations/create_activity_log_table.php.stub' => database_path("/migrations/{$timestamp}_create_activity_log_table.php"),
+            ], 'migrations');
+        }
+
+        // additional migration
+        if (!class_exists('AddParentSubjectToActivityLogTable')) {
+            $timestamp = date('Y_m_d_His', time());
+
+            $this->publishes([
+                __DIR__ . '/../migrations/add_parent_subject_to_activity_log_table.php.stub' => database_path("/migrations/{$timestamp}_add_parent_subject_to_activity_log_table.php"),
             ], 'migrations');
         }
     }
@@ -45,8 +54,10 @@ class ActivitylogServiceProvider extends ServiceProvider
     {
         $activityModel = config('activitylog.activity_model') ?? ActivityModel::class;
 
-        if (! is_a($activityModel, Activity::class, true)
-            || ! is_a($activityModel, Model::class, true)) {
+        if (
+            !is_a($activityModel, Activity::class, true)
+            || !is_a($activityModel, Model::class, true)
+        ) {
             throw InvalidConfiguration::modelIsNotValid($activityModel);
         }
 

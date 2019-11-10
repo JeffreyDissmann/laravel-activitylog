@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AddParentSubjectToActivityLogTable extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up()
+    {
+        Schema::connection(config('activitylog.database_connection'))->table(config('activitylog.table_name'), function (Blueprint $table) {
+
+            $table->unsignedBigInteger('parent_subject_id')->nullable()->after('subject_type');
+            $table->string('parent_subject_type')->nullable()->after('parent_subject_id');
+
+            $table->index(['parent_subject_id', 'parent_subject_type'], 'parent_subject');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down()
+    {
+        Schema::connection(config('activitylog.database_connection'))->table(config('activitylog.table_name'), function (Blueprint $table) {
+            $table->dropIndex('parent_subject');
+            $table->dropColumn(['parent_subject_id', 'parent_subject_type']);
+        });
+    }
+}
